@@ -1,4 +1,3 @@
-using ArmGSService;
 using ArmGSService.Interfaces;
 using ArmGSService.Models;
 using ArmGSService.Services;
@@ -34,6 +33,6 @@ app.MapPost("/sendText", (TextDto dto, IArmGsApiService service)
     => service.SendText(dto));
 
 app.MapPost("/sendFile", ([FromForm] FileTextDto dto, IFormFile file, IArmGsApiService service)
-    => service.SendFile(dto, file));
+    => service.SendFile(dto, file)).DisableAntiforgery();
 
 app.Run();
