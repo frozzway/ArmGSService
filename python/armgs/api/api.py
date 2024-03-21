@@ -41,8 +41,8 @@ async def check_permission(nick: BotNick, chatId: ChatId, service: ArmGSServiceD
     return await service.check_permission(nick, chatId)
 
 
-@router.get('/checkPermissions',
-            response_model=list[str] | BaseVm,
+@router.post('/checkPermissions',
+            response_model=list[ChatId] | BaseVm,
             description='Метод проверки наличия разрешения на отправку сообщений пользователям')
 async def check_permissions(nick: BotNick, chatsId: list[ChatId], service: ArmGSServiceDp):
     return await service.check_permissions(nick, chatsId)
