@@ -1,63 +1,59 @@
-import inspect
-from typing import Literal, Type, Annotated
+from typing import Literal
 
-from pydantic import Field, BaseModel
-from fastapi import Form
-
+from sqlmodel import SQLModel, Field
+from armgs.models.utils import form_data
 
 parseModes = Literal['HTML', 'MarkdownV2']
 
 
-def form_data(cls: Type[BaseModel]):
-    new_parameters = []
-
-    for field_name, model_field in cls.model_fields.items():
-        new_parameters.append(
-             inspect.Parameter(
-                 model_field.alias if model_field.alias else field_name,
-                 inspect.Parameter.POSITIONAL_ONLY,
-                 default=model_field.default,
-                 annotation=Annotated[model_field.annotation, Form()]
-             )
-         )
-
-    async def as_form_func(**data):
-        return cls(**data)
-
-    sig = inspect.signature(as_form_func)
-    sig = sig.replace(parameters=new_parameters)
-    as_form_func.__signature__ = sig
-    setattr(cls, 'as_form', as_form_func)
-    return cls
-
-
-class Dto(BaseModel):
+class Dto(SQLModel):
+    """Базовый объект передачи данных"""
     token: str = Field(description='Токен бота')
     chatId: str = Field(description='Уникальный ник, email пользователя или id чата')
 
 
 class TextDto(Dto):
+    """Объект передачи данных для отправки сообщения в чат"""
     text: str = Field(description='Текст сообщения. Можно упомянуть пользователя, добавив в текст его userId в следующем формате @[userId].')
     parseMode: parseModes | None = Field(description='Режим обработки форматирования из текста сообщения', default=None)
 
 
 @form_data
 class FileTextDto(Dto):
+    """Объект передачи данных для отправки файла в чат"""
     caption: str | None = None
     parseMode: parseModes | None = Field(description='Режим обработки форматирования из текста сообщения', default=None)
 
 
-class BaseVm(BaseModel):
+class BaseVm(SQLModel):
+    """Ответ с API"""
     ok: bool = Field(description='Статус запроса')
     description: str | None = Field(description='Описание ошибки')
 
 
 class MessageVm(BaseVm):
+    """Ответ с API на команду отправки сообщения"""
     msgId: str | None = Field(description='Идентификатор сообщения')
 
 
 class TokenValidationVm(BaseVm):
+    """Ответ с API на команду валидации токена"""
     userId: str = Field(description='Уникальный идентификатор бота')
     nick: str = Field(description='Уникальный ник бота')
     firstName: str = Field(description='Имя бота')
     about: str | None = Field(description='Описание бота')
+
+
+class PermissionBase(SQLModel):
+    """Полученные разрешения на отправку сообщений ботами"""
+    chatId: str = Field(description='Уникальный ник, email пользователя или id чата')
+    nick: str = Field(description='Уникальный ник бота')
+
+
+class Permission(PermissionBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+
+class PermissionVm(PermissionBase):
+    """Модель отображения сущности 'Полученные разрешения на отправку сообщений ботами'"""
+    hasPermission: bool = Field(description="Наличие разрешения на отправку сообщений")

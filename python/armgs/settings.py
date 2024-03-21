@@ -6,7 +6,6 @@ class Settings(BaseSettings):
     server_port: int = '8080'
     timezone: str = 'Asia/Yekaterinburg'
 
-    db_dialect: str = 'postgresql+asyncpg'
     db_username: str = 'postgres'
     db_password: str = '123'
     db_host: str = 'localhost'
@@ -20,3 +19,8 @@ settings = Settings(
     _env_file='.env',
     _env_file_encoding='utf-8',
 )
+
+
+bots_tokens = {
+    '001.0138958387.3206533949:89260743436': 'oadbot'
+}

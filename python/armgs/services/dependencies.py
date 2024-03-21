@@ -3,12 +3,13 @@ from typing import Annotated
 
 from httpx import AsyncClient
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from armgs.database import Session
+from armgs.database import AsyncSessionMaker
 
 
-async def get_session() -> AsyncGenerator[Session, None]:
-    session = Session()
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    session = AsyncSessionMaker()
     await session.begin()
     try:
         yield session
@@ -21,5 +22,5 @@ async def get_http_client() -> AsyncGenerator[AsyncClient, None]:
         yield client
 
 
-SessionDp = Annotated[Session, Depends(get_session)]
+AsyncSessionDp = Annotated[AsyncSession, Depends(get_async_session)]
 HttpClientDp = Annotated[AsyncClient, Depends(get_http_client)]

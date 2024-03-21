@@ -1,1 +1,1 @@
-from .service import ArmGSService
+from .armgs import ArmGSService
