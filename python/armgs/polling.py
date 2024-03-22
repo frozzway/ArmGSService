@@ -32,6 +32,10 @@ def message_cb(bot: Bot, event: Event):
         .where(Permission.chatId == event.from_chat, Permission.nick == bot.name) \
         .scalar()
 
+    if event.text == '/stop' and permission:
+        session.delete(permission)
+        session.commit()
+
     if not permission:
         permission = Permission(chatId=event.from_chat, nick=bot.name)
         session.add(permission)
